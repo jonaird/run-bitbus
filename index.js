@@ -20,7 +20,15 @@ exports.run = function run(key, query, pipeFunction, onFinish) {
                 .pipe(es.map((data, callback) => {
                     if (data) {
                         let d = JSON.parse(data);
-                        pipeFunction(d);
+                        if(pipeFunction.constructor.name=='AsyncFunction'){
+                            pipeFunction(d).then(()=>{
+                                callback();
+                            })
+                        }else{
+                            pipeFunction(d);
+                            callback();
+                        }
+                        
 
                     }
                 }))
