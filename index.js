@@ -1,48 +1,24 @@
 const fetch = require('node-fetch');
 const es = require('event-stream');
-const { sleep,  Queue } = require('./utils.js')
+const { sleep, SelfDrainingQueue } = require('./utils.js')
 
-exports.run = function run(key, query, process, callback) {
-    var queue = new Queue();
-    var draining = false;
+exports.run = function run(token, query, process, callback) {
+    var queue = new SelfDrainingQueue(process);
 
-    async function drainQueue() {
-        return new Promise(async resolve => {
-            draining = true;
-            while (queue.getLength() > 0) {
-                if (process.constructor.name == 'AsyncFunction') {
-                    var tx = queue.dequeue();
-                    await process(tx);
-                } else {
-                    var tx = queue.dequeue();
-                    process(tx);
-                }
-            }
-            draining = false;
-            resolve();
-        })
-
-
-    }
-
-    async function onSyncFinish() {
-        if(!drainQueue&&(queue.getLength()>0)){
-            await drainQueue();
-        }
-        while(draining){
-            await sleep(500)
+    async function onSyncFinish() {  
+        while(!queue.isDrained()){
+            await sleep(200)
         }
         if(callback){
             callback();
         }
-
     }
 
     fetch("https://txo.bitbus.network/block", {
         method: "post",
         headers: {
             'Content-type': 'application/json; charset=utf-8',
-            'token': key
+            'token': token
         },
         body: JSON.stringify(query)
     })
@@ -54,9 +30,6 @@ exports.run = function run(key, query, process, callback) {
                     if (data) {
                         let d = JSON.parse(data);
                         queue.enqueue(d);
-                        if (!draining) {
-                            drainQueue();
-                        }
                         callback();
                     }
                 }))
