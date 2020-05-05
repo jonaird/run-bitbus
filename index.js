@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const es = require('event-stream');
 const { sleep, SelfDrainingQueue } = require('./utils.js')
 
-exports.run = function run(token, query, process, callback) {
+exports.run = function run(token, query, process, callback, endPoint) {
     var queue = new SelfDrainingQueue(process);
 
     async function onSyncFinish() {  
@@ -14,7 +14,10 @@ exports.run = function run(token, query, process, callback) {
         }
     }
 
-    fetch("https://txo.bitbus.network/block", {
+    var url;
+    endPoint?url=endPoint:url="https://txo.bitbus.network/block";
+
+    fetch(url, {
         method: "post",
         headers: {
             'Content-type': 'application/json; charset=utf-8',

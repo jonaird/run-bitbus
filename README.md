@@ -10,12 +10,13 @@ run-bitbus is a convenience library for running [Bitbus](https://bitbus.network)
 
 run-bitbus comes with 2 functions to interact with Bitbus, run and getStatus.
 
-### run(token, query, processFunction, (optional) callback)
+### run(token, query, processFunction, (optional) callback, (optional) endPoint)
 
 token: Your Bitbus api token which you can get [here](https://token.planaria.network).  
 query: A [Bitbus query](https://docs.bitbus.network/#/?id=_2-query).  
 processFunction: This function is called for each individual transaction received from bitbus (which come in the order that they appear in on the blockchain) and is passed the transaction as an object. It can be either syncronous or async but if it is async, make sure to return a promise that resolves when it's finished processing.   
-callback: Called when Bitbus is finished crawling transactions.
+callback: Called when Bitbus is finished crawling transactions.  
+endPoint: Endpoint to be used. Defaults to TXO
 
 
 example:
